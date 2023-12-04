@@ -12,6 +12,7 @@ import LabelBottomNavigation from "../components/BottomMenu";
 import LabelBottomNavigationNutritionist from "../components/BottomMenuNutritionist";
 import DrawerNutritionist from "../components/DrawerNutritionist";
 import {
+  CircularProgress,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -28,6 +29,8 @@ const defaultTheme = createTheme();
 const MyProfile = () => {
   const theme = useTheme();
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     function handleResize() {
       setIsMobile(window.innerWidth <= theme.breakpoints.values.sm);
@@ -57,6 +60,7 @@ const MyProfile = () => {
   }, []);
 
   const getUserById = async () => {
+    setIsLoading(true);
     const response = await fetch(
       apiUrl + "/api/auth/users/" + localStorage.getItem("userId"),
       {
@@ -70,6 +74,7 @@ const MyProfile = () => {
 
     const data = await response.json();
     setUser(data.data);
+    setIsLoading(false);
   };
 
   const handleWeightInputChange = (e) => {
@@ -148,6 +153,13 @@ const MyProfile = () => {
       ) : (
         <Drawer user={localStorage.getItem("username")} />
       )}
+      {isLoading ? (
+        <div
+          style={{ display: "flex", justifyContent: "center", width: "100%" }}
+        >
+          <CircularProgress size={80} thickness={3} />
+        </div>
+      ) : (
       <ThemeProvider theme={defaultTheme}>
         <Container component="main" maxWidth="s" maxheight="s">
           <CssBaseline />
@@ -326,7 +338,7 @@ const MyProfile = () => {
             </Box>
           </Box>
         </Container>
-      </ThemeProvider>
+      </ThemeProvider>)}
     </div>
   );
 };
