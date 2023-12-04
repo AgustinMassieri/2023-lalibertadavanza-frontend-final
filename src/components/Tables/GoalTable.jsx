@@ -14,7 +14,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import Modal from "@mui/material/Modal";
 import getApiUrl from "../../helpers/apiConfig";
 import CloseIcon from "@mui/icons-material/Close";
-import { Button, Grid, TextField } from "@mui/material";
+import { Button, CircularProgress, Grid, TextField } from "@mui/material";
 import GoalForm from "../../components/Forms/GoalForm";
 import { useSnackbar } from "notistack";
 import InfoIcon from "@mui/icons-material/Info";
@@ -22,6 +22,7 @@ import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import SentimentVerySatisfiedIcon from "@mui/icons-material/SentimentVerySatisfied";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
+import { set } from "date-fns";
 
 const apiUrl = getApiUrl();
 
@@ -72,6 +73,7 @@ export default function GoalTable({ filterOpen, isCreateModalOpen }) {
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -93,6 +95,7 @@ export default function GoalTable({ filterOpen, isCreateModalOpen }) {
   ]);
 
   const handleGetGoals = async () => {
+    setIsLoading(true);
     const response = await fetch(
       apiUrl + "/api/goals/goalsWithProgress/" + localStorage.getItem("userId"),
       {
@@ -115,6 +118,7 @@ export default function GoalTable({ filterOpen, isCreateModalOpen }) {
       setGoals(data.goalsWithProgress);
       setTotalItems(data.goalsWithProgress.length);
     }
+    setIsLoading(false);
   };
 
   const handleDeleteGoal = async (goal) => {
@@ -203,6 +207,13 @@ export default function GoalTable({ filterOpen, isCreateModalOpen }) {
           </FormControl>
         </div>
       )}
+            {isLoading ? (
+        <div
+          style={{ display: "flex", justifyContent: "center", width: "100%" }}
+        >
+          <CircularProgress size={80} thickness={3} />
+        </div>
+      ) :(
       <TableContainer component={Paper} sx={{ minWidth: 200, minHeight: 420 }}>
         <Table aria-label="custom pagination table">
           <TableHead sx={{ fontWeight: "bold" }}>
@@ -268,7 +279,7 @@ export default function GoalTable({ filterOpen, isCreateModalOpen }) {
             onPageChange={handleChangePage}
           />
         </Box>
-      </TableContainer>
+      </TableContainer>)}
 
       <Modal open={selectedGoal !== null} onClose={() => setSelectedGoal(null)}>
         <Box

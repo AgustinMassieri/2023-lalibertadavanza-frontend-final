@@ -3,7 +3,7 @@ import DrawerNutritionist from "../components/DrawerNutritionist";
 import LabelBottomNavigationNutritionist from "../components/BottomMenuNutritionist";
 import { useTheme } from "@mui/material/styles";
 import getApiUrl from "../helpers/apiConfig";
-import { Grid, Button } from "@mui/material";
+import { Grid, Button, CircularProgress } from "@mui/material";
 import { useSnackbar } from "notistack";
 
 const apiUrl = getApiUrl();
@@ -14,6 +14,7 @@ const RelationshipRequestInbox = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [relationshipRequestList, setRelationshipRequestList] = useState([]);
   const [flagToRender, setFlagToRender] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     function handleResize() {
@@ -31,6 +32,7 @@ const RelationshipRequestInbox = () => {
   }, [flagToRender]);
 
   const handleGetRelationshipRequestByNutritionist = async () => {
+    setIsLoading(true);
     const response = await fetch(
       apiUrl +
         "/api/relationshipRequest/getRelationshipRequestByNutritionistId/" +
@@ -45,6 +47,7 @@ const RelationshipRequestInbox = () => {
     );
     const data = await response.json();
     setRelationshipRequestList(data.data);
+    setIsLoading(false);
   };
 
   const handleAcceptNutritionistRelationship = async (id, userId) => {
@@ -121,91 +124,102 @@ const RelationshipRequestInbox = () => {
       >
         MY RELATIONSHIP requests
       </h2>
-      {relationshipRequestList.length === 0 ? (
-        <p style={noPatientsStyle}>You currently have no relationship requests.</p>
+      {isLoading ? (
+        <div
+          style={{ display: "flex", justifyContent: "center", width: "100%" }}
+        >
+          <CircularProgress size={80} thickness={3} />
+        </div>
+      ) : relationshipRequestList.length === 0 ? (
+        <p style={noPatientsStyle}>
+          You currently have no relationship requests.
+        </p>
       ) : (
-      <Grid container spacing={2}>
-        {relationshipRequestList.map((relationshipRequest) => (
-          <Grid item xs={12} md={6} key={relationshipRequest._id}>
-            <div style={boxStyle}>
-              <div style={rowStyle}>
-                <p style={{ color: "black", margin: 0 }}>
-                  Name: {relationshipRequest.user.firstName}{" "}
-                  {relationshipRequest.user.lastName}
-                </p>
-                <p style={{ color: "black", margin: 0 }}>
-                  Email: {relationshipRequest.user.email}
-                </p>
-              </div>
-              <div style={rowStyle}>
-                <p style={{ color: "black", margin: 0 }}>
-                  Sex: {relationshipRequest.user.sex}
-                </p>
-                <p style={{ color: "black", margin: 0 }}>
-                  Age: {relationshipRequest.user.age} years
-                </p>
-              </div>
-              <div style={rowStyle}>
-                <p style={{ color: "black", margin: 0 }}>
-                  Height: {relationshipRequest.user.height} cm
-                </p>
-                <p style={{ color: "black", margin: 0 }}>
-                  Weight: {relationshipRequest.user.weight} kg
-                </p>
-              </div>
-              {relationshipRequest.status === "Sent" ? (
-                <div style={actionContainerStyle}>
-                  <Grid container justifyContent="center" spacing={2}>
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() =>
-                          handleAcceptNutritionistRelationship(
-                            relationshipRequest._id,
-                            relationshipRequest.user._id
-                          )
-                        }
-                        sx={{
-                          mt: 3,
-                          mb: 2,
-                          backgroundColor: "#373D20",
-                          "&:hover": { backgroundColor: "#373D20" },
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Accept
-                      </Button>
-                    </Grid>
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => {}}
-                        sx={{
-                          mt: 3,
-                          mb: 2,
-                          backgroundColor: "#373D20",
-                          "&:hover": { backgroundColor: "#373D20" },
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Reject
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </div>
-              ) : (
-                <div style={actionContainerStyle}>
-                  <p style={{ color: "black", margin: 0, fontWeight: "bold" }}>
-                    {relationshipRequest.status}
+        <Grid container spacing={2}>
+          {relationshipRequestList.map((relationshipRequest) => (
+            <Grid item xs={12} md={6} key={relationshipRequest._id}>
+              <div style={boxStyle}>
+                <div style={rowStyle}>
+                  <p style={{ color: "black", margin: 0 }}>
+                    Name: {relationshipRequest.user.firstName}{" "}
+                    {relationshipRequest.user.lastName}
+                  </p>
+                  <p style={{ color: "black", margin: 0 }}>
+                    Email: {relationshipRequest.user.email}
                   </p>
                 </div>
-              )}
-            </div>
-          </Grid>
-        ))}
-      </Grid>)}
+                <div style={rowStyle}>
+                  <p style={{ color: "black", margin: 0 }}>
+                    Sex: {relationshipRequest.user.sex}
+                  </p>
+                  <p style={{ color: "black", margin: 0 }}>
+                    Age: {relationshipRequest.user.age} years
+                  </p>
+                </div>
+                <div style={rowStyle}>
+                  <p style={{ color: "black", margin: 0 }}>
+                    Height: {relationshipRequest.user.height} cm
+                  </p>
+                  <p style={{ color: "black", margin: 0 }}>
+                    Weight: {relationshipRequest.user.weight} kg
+                  </p>
+                </div>
+                {relationshipRequest.status === "Sent" ? (
+                  <div style={actionContainerStyle}>
+                    <Grid container justifyContent="center" spacing={2}>
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() =>
+                            handleAcceptNutritionistRelationship(
+                              relationshipRequest._id,
+                              relationshipRequest.user._id
+                            )
+                          }
+                          sx={{
+                            mt: 3,
+                            mb: 2,
+                            backgroundColor: "#373D20",
+                            "&:hover": { backgroundColor: "#373D20" },
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Accept
+                        </Button>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => {}}
+                          sx={{
+                            mt: 3,
+                            mb: 2,
+                            backgroundColor: "#373D20",
+                            "&:hover": { backgroundColor: "#373D20" },
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Reject
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </div>
+                ) : (
+                  <div style={actionContainerStyle}>
+                    <p
+                      style={{ color: "black", margin: 0, fontWeight: "bold" }}
+                    >
+                      {relationshipRequest.status}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Grid>
+          ))}
+        </Grid>
+      )}
     </div>
   );
 };
